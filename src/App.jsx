@@ -3,20 +3,20 @@ import { Chess } from "chess.js";
 import { Chessboard } from "react-chessboard";
 import { CATEGORIES, LINES } from "./data/lines";
 
-const API = "https://explorer.lichess.ovh/masters";
 
 async function fetchTopMoves(fen) {
-  const res = await fetch(`${API}?fen=${encodeURIComponent(fen)}&topGames=0`);
-  if (!res.ok) throw new Error("explorer " + res.status);
+  // ChessDB.cn : base communautaire gratuite, sans clé, CORS OK
+  const res = await fetch(
+    `https://www.chessdb.cn/cdb.php?action=queryall&board=${encodeURIComponent(fen)}&json=1`
+  );
+  if (!res.ok) throw new Error("chessdb " + res.status);
   const data = await res.json();
+  if (data.status !== "ok" || !Array.isArray(data.moves)) return [];
   return data.moves
-    .filter((m) => m.white + m.draws + m.black > 0)
-    .map((m) => {
-      const total = m.white + m.draws + m.black;
-      const score = (m.white + m.draws * 0.5) / total;
-      return { san: m.san, total, score };
-    })
-    .slice(0, 5);
+    .slice()
+    .sort((a, b) => (a.rank || 99) - (b.rank || 99) || parseFloat(b.winrate) - parseFloat(a.winrate))
+    .slice(0, 5)
+    .map((m) => ({ san: m.san, total: 0, score: parseFloat(m.winrate) / 100, note: m.note || "" }));
 }
 
 function WinBar({ move }) {
@@ -25,7 +25,7 @@ function WinBar({ move }) {
   return (
     <div className="winbar">
       <div className="winbar-fill" style={{ width: `${pct}%`, background: color }} />
-      <span>{pct}% Blancs</span>
+      <span>{pct}% réussite</span>
     </div>
   );
 }
@@ -154,19 +154,19 @@ export default function App() {
           <h2>Meilleurs coups ici</h2>
           {loading && <p className="muted">Chargement…</p>}
           {error && <p className="error">{error} <button onClick={loadTop}>Réessayer</button></p>}
-          {topMoves && topMoves.length === 0 && <p className="muted">Position hors base masters.</p>}
+          {topMoves && topMoves.length === 0 && <p className="muted">Position hors base — continue à jouer librement.</p>}
           {topMoves && topMoves.map((m, i) => (
             <div key={m.san} className={i === 0 ? "movecard best" : "movecard"} onClick={() => playSan(m.san)} role="button" tabIndex={0}>
               <div className="movehead">
                 <span className="rank">#{i + 1}</span>
                 <strong className="san">{m.san}</strong>
-                <span className="games">{m.total.toLocaleString("fr-FR")} parties</span>
+                <span className="games">{m.note || ""}</span>
                 <span className="playhint">jouer ▸</span>
               </div>
               <WinBar move={m} />
             </div>
           ))}
-          <p className="muted small">Score = % (Blancs) sur parties maîtres. Source : explorateur Lichess.</p>
+          <p className="muted small">Score = % de réussite pour le camp qui joue (base ChessDB, parties + analyse). Meilleur coup en vert.</p>
         </aside>
       </div>
     </div>
