@@ -97,10 +97,49 @@ export default function App() {
     return true;
   }
 
+  // --- tap-tap : sélection puis destination ---
+  const [selected, setSelected] = useState(null);
+  const legalTargets = useMemo(() => {
+    if (!selected) return {};
+    const t = {};
+    for (const m of game.moves({ square: selected, verbose: true })) t[m.to] = true;
+    return t;
+  }, [selected, game]);
+
+  const squareStyles = useMemo(() => {
+    const s = {};
+    if (selected) s[selected] = { background: "rgba(212,162,74,0.55)", borderRadius: "4px" };
+    for (const t of Object.keys(legalTargets))
+      s[t] = {
+        background:
+          game.get(t) && game.get(t).color !== game.turn()
+            ? "radial-gradient(circle, rgba(239,68,68,0.9) 22%, transparent 24%)"
+            : "radial-gradient(circle, rgba(34,197,94,0.85) 22%, transparent 26%)",
+        borderRadius: "4px",
+        cursor: "pointer",
+      };
+    return s;
+  }, [selected, legalTargets, game]);
+
+  function onSquareClick({ square }) {
+    if (selected && legalTargets[square]) {
+      const g = new Chess(fen);
+      const mv = g.move({ from: selected, to: square, promotion: "q" });
+      if (mv) {
+        setMoves([...moves, mv.san]);
+        setSelected(null);
+        return;
+      }
+    }
+    const piece = game.get(square);
+    if (piece && piece.color === game.turn()) setSelected(square);
+    else setSelected(null);
+  }
+
   return (
     <div className="app">
       <header>
-        <h1>♟ Chess Openings Lab <small class="ver">v3</small></h1>
+        <h1>♟ Chess Openings Lab <small class="ver">v4</small></h1>
         <p>Top 10 ouvertures · défenses · systèmes — meilleurs coups à chaque position (données masters Lichess). Bouge les pièces librement ou clique un coup conseillé.</p>
       </header>
 
@@ -137,6 +176,8 @@ export default function App() {
             position={fen}
             boardWidth={boardW}
             onPieceDrop={onDrop}
+            onSquareClick={onSquareClick}
+            squareStyles={squareStyles}
             customBoardStyle={{ borderRadius: "10px", boxShadow: "0 6px 18px rgba(0,0,0,0.5)" }}
           />
 
