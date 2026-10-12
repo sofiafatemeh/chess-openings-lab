@@ -79,3 +79,4 @@ header p { margin: 4px 0 16px; color: var(--muted); font-size: 0.9rem; }
 .small { font-size: 0.75rem; }
 .error { color: #ef4444; }
 .error button { background: transparent; border: 1px solid var(--line); color: var(--text); border-radius: 6px; cursor: pointer; }
+.playhint{color:var(--green);font-size:0.75rem;margin-left:6px} .movecard{cursor:pointer} .movecard:hover{border-color:var(--accent)}
