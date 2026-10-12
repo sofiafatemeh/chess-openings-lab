@@ -100,7 +100,7 @@ export default function App() {
   return (
     <div className="app">
       <header>
-        <h1>♟ Chess Openings Lab</h1>
+        <h1>♟ Chess Openings Lab <small class="ver">v3</small></h1>
         <p>Top 10 ouvertures · défenses · systèmes — meilleurs coups à chaque position (données masters Lichess). Bouge les pièces librement ou clique un coup conseillé.</p>
       </header>
 
