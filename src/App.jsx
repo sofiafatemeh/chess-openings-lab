@@ -139,7 +139,7 @@ export default function App() {
   return (
     <div className="app">
       <header>
-        <h1>♟ Chess Openings Lab <small class="ver">v5</small></h1>
+        <h1>♟ Chess Openings Lab <small class="ver">v6</small></h1>
         <p>Top 10 ouvertures · défenses · systèmes — meilleurs coups à chaque position (données masters Lichess). Bouge les pièces librement ou clique un coup conseillé.</p>
       </header>
 
@@ -176,7 +176,7 @@ export default function App() {
             options={{
               position: fen,
               boardWidth: boardW,
-              onPieceDrop,
+              onPieceDrop: onDrop,
               onSquareClick,
               squareStyles,
               boardStyle: { borderRadius: "10px", boxShadow: "0 6px 18px rgba(0,0,0,0.5)" },
